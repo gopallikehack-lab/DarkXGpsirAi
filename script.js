@@ -16,7 +16,7 @@ function loadCategory(category) {
     fetchImage();
 }
 
-// ===== FETCH IMAGE =====
+// ===== FETCH IMAGE (Handles Binary/JSON) =====
 async function fetchImage() {
     imageContainer.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>`;
     try {
@@ -26,18 +26,76 @@ async function fetchImage() {
         
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
-        const data = await response.json();
-        console.log('📦 Raw API Response:', data);
+        const contentType = response.headers.get('content-type') || '';
+        console.log('📄 Content-Type:', contentType);
         
-        // Store raw data
+        // ===== CHECK IF BINARY IMAGE =====
+        if (contentType.includes('image') || contentType.includes('octet-stream')) {
+            // Binary image response — convert to blob URL
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            currentImageUrl = imageUrl;
+            
+            imageContainer.innerHTML = `
+                <div class="image-wrapper">
+                    <img src="${imageUrl}" alt="${currentCategory}" />
+                </div>
+                <div class="image-meta">
+                    <span>📂 Category: ${currentCategory.toUpperCase()}</span>
+                    <span>📄 Type: ${contentType}</span>
+                    <span>📦 Size: ${(blob.size / 1024).toFixed(1)} KB</span>
+                </div>
+                <div class="controls">
+                    <button onclick="refreshImage()" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button onclick="downloadImage()" class="download-btn">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        // ===== TRY TO PARSE AS JSON =====
+        let data;
+        try {
+            const text = await response.text();
+            data = JSON.parse(text);
+        } catch (e) {
+            // If not JSON, treat as binary
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            currentImageUrl = imageUrl;
+            
+            imageContainer.innerHTML = `
+                <div class="image-wrapper">
+                    <img src="${imageUrl}" alt="${currentCategory}" />
+                </div>
+                <div class="image-meta">
+                    <span>📂 Category: ${currentCategory.toUpperCase()}</span>
+                    <span>📄 Raw Binary Image</span>
+                    <span>📦 Size: ${(blob.size / 1024).toFixed(1)} KB</span>
+                </div>
+                <div class="controls">
+                    <button onclick="refreshImage()" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button onclick="downloadImage()" class="download-btn">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        console.log('📦 JSON Response:', data);
         currentRawData = data;
         
-        // Extract image URL
+        // ===== EXTRACT IMAGE URL FROM JSON =====
         let imageUrl = null;
         let imageTitle = '';
-        let extraInfo = '';
         
-        // Try different response formats
         if (data.url) {
             imageUrl = data.url;
             imageTitle = data.title || data.name || currentCategory;
@@ -71,7 +129,6 @@ async function fetchImage() {
         
         if (imageUrl) {
             currentImageUrl = imageUrl;
-            // Render with raw data
             imageContainer.innerHTML = `
                 <div class="image-wrapper">
                     <img src="${imageUrl}" alt="${currentCategory}" />
@@ -84,9 +141,16 @@ async function fetchImage() {
                     <span>📂 Category: ${currentCategory.toUpperCase()}</span>
                     <span>🔗 <a href="${imageUrl}" target="_blank">Open Image</a></span>
                 </div>
+                <div class="controls">
+                    <button onclick="refreshImage()" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button onclick="downloadImage()" class="download-btn">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
             `;
         } else {
-            // Show raw data even if no image found
             imageContainer.innerHTML = `
                 <div class="raw-data" style="width:100%;">
                     <h3>⚠️ No Image Found — Raw Response:</h3>

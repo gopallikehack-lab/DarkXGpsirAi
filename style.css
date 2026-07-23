@@ -100,3 +100,41 @@ footer { text-align: center; color: #334455; padding: 20px; border-top: 1px soli
 .image-meta a:hover {
     text-decoration: underline;
 }
+
+/* ===== CONTROLS INSIDE IMAGE AREA ===== */
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+.controls .refresh-btn,
+.controls .download-btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.controls .refresh-btn {
+    background: linear-gradient(45deg, #00d4ff, #0088cc);
+    color: #fff;
+}
+.controls .refresh-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+}
+.controls .download-btn {
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
+    color: #fff;
+}
+.controls .download-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(76,175,80,0.3);
+}
