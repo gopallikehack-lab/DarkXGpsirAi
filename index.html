@@ -4,55 +4,562 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>DarkX — GpsirAi</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        /* ----- RESET & BASE ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0d0b1a, #05030a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px;
+        }
+
+        .glass {
+            background: rgba(20, 15, 35, 0.55);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 48px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            padding: 40px 35px;
+            transition: all 0.3s ease;
+        }
+
+        /* ----- HEADER ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px 25px;
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand .icon {
+            font-size: 2.6rem;
+            filter: drop-shadow(0 0 12px #ff3b6f);
+        }
+
+        .brand h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff3b6f, #ff8a5c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .brand small {
+            font-size: 0.75rem;
+            color: #a09bb8;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-left: 6px;
+            -webkit-text-fill-color: #a09bb8;
+        }
+
+        .subtitle {
+            color: #b8b0d0;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border-left: 2px solid #ff3b6f55;
+            padding-left: 18px;
+        }
+
+        /* ----- CATEGORY GRID ----- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 60px;
+            padding: 16px 10px;
+            color: #cbc3e6;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s ease;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .cat-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #ff3b6f55;
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 12px 28px rgba(255, 59, 111, 0.15);
+            color: #fff;
+        }
+
+        .cat-btn.active {
+            background: rgba(255, 59, 111, 0.12);
+            border-color: #ff3b6f;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(255, 59, 111, 0.08);
+        }
+
+        /* ----- IMAGE CONTAINER ----- */
+        .image-wrapper {
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            display: block;
+            transition: opacity 0.5s ease;
+            border-radius: 32px;
+        }
+
+        .image-wrapper .placeholder {
+            color: #5a5270;
+            font-size: 1.2rem;
+            padding: 40px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .image-wrapper .placeholder span {
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        /* ----- ACTION ROW ----- */
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 14px 34px;
+            border-radius: 60px;
+            color: #ddd6f0;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s ease;
+            backdrop-filter: blur(6px);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: #ff3b6f66;
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff3b6f, #e62e5c);
+            border-color: #ff3b6f;
+            color: #fff;
+            box-shadow: 0 6px 24px rgba(255, 59, 111, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff527c, #f03a66);
+            border-color: #ff6b8a;
+            box-shadow: 0 10px 36px rgba(255, 59, 111, 0.3);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-outline:hover {
+            border-color: #8880aa;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .btn .badge {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 0.7rem;
+            color: #b0a8c8;
+        }
+
+        /* ----- FOOTER ----- */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #58506e;
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 28px;
+        }
+
+        .footer span {
+            color: #ff3b6f;
+        }
+
+        .footer .keys {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 40px;
+            padding: 4px 16px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: #7a7290;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .footer .keys kbd {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 10px;
+            border-radius: 20px;
+            color: #b0a8c8;
+            font-family: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 18px;
+            }
+            .brand h1 {
+                font-size: 1.6rem;
+            }
+            .brand .icon {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 0.8rem;
+                padding-left: 12px;
+                border-left-width: 1px;
+            }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .cat-btn {
+                padding: 12px 6px;
+                font-size: 0.9rem;
+                border-radius: 40px;
+            }
+            .btn {
+                padding: 12px 22px;
+                font-size: 0.9rem;
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+            .actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            .actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .image-wrapper {
+                min-height: 260px;
+            }
+            .image-wrapper img {
+                max-height: 380px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .cat-btn {
+                font-size: 0.75rem;
+                padding: 10px 4px;
+            }
+            .brand h1 {
+                font-size: 1.3rem;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .subtitle {
+                border-left: none;
+                padding-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- ===== HEADER ===== -->
-        <header class="header">
-            <div class="logo">🌑 Dark Mai Nhi Hu Just Ek Test Hai Bhai 🥲🌚 Unlimited Photos Just Refresh<span>X</span></div>
-            <div class="badge">🔞 15+ Kyu ki Anime Version hai chomu bhai Kuch nhi Hota 🥲 Jaldi Hi band kardunga Jail nhi jana</div>
-        </header>
 
-        <!-- ===== CATEGORIES ===== -->
-        <div class="categories">
-            <button class="cat-btn active" onclick="loadCategory('pussy')">
-                <i class="fas fa-cat"></i> Pussy
-            </button>
-            <button class="cat-btn" onclick="loadCategory('cuckold')">
-                <i class="fas fa-user-secret"></i> Cuckold
-            </button>
-            <button class="cat-btn" onclick="loadCategory('yuri')">
-                <i class="fas fa-female"></i> Yuri
-            </button>
-            <button class="cat-btn" onclick="loadCategory('blowjob')">
-                <i class="fas fa-kiss-wink-heart"></i> Blowjob
-            </button>
+<div class="glass container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="brand">
+            <span class="icon">🌑</span>
+            <h1>DarkX <small>GpsirAi</small></h1>
         </div>
-
-        <!-- ===== CONTENT ===== -->
-        <div class="content">
-            <div class="image-container" id="imageContainer">
-                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
-            </div>
-            <div class="controls">
-                <button onclick="refreshImage()" class="refresh-btn">
-                    <i class="fas fa-sync-alt"></i> Refresh Karte Jaa🌚 No Jerk.!!
-                </button>
-                <button onclick="downloadImage()" class="download-btn">
-                    <i class="fas fa-download"></i> Download karke dost ko bhejega
-                </button>
-            </div>
-            <p class="credit">🖤 Powered by Kimiya Hanade(Mera Virtual Naam hai bhai)<strong>GpsirAi</strong> • Shadow Community</p>
-        </div>
-
-        <footer>
-            <p>© 2026 <strong>DarkXGopal</strong> • By ~GpSirEra</p>
-            <p class="tag">Just A Fucking Guy I am To Make This Kinda Shit~#gpsirAI</p>
-        </footer>
+        <div class="subtitle">🔞 18+ · NSFW Aggregator</div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- CATEGORIES -->
+    <div class="grid" id="categoryGrid">
+        <button class="cat-btn" data-api="pussy">🐱 Pussy</button>
+        <button class="cat-btn" data-api="cuckold">🔄 Cuckold</button>
+        <button class="cat-btn" data-api="yuri">🌸 Yuri</button>
+        <button class="cat-btn" data-api="blowjob">🍆 Blowjob</button>
+    </div>
+
+    <!-- IMAGE -->
+    <div class="image-wrapper" id="imageWrapper">
+        <div class="placeholder" id="placeholder">
+            <span>🌑</span>
+            Select a category<br/>to load the first image
+        </div>
+        <img id="mainImage" style="display:none;" alt="NSFW content" />
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <button class="btn btn-primary" id="refreshBtn">⟳ Refresh</button>
+        <button class="btn btn-outline" id="downloadBtn">⬇ Download</button>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <div>Built with <span>🖤</span> by <span>GpsirEra</span> · Shadow Community</div>
+        <div class="keys">
+            <kbd>R</kbd> Refresh &nbsp;·&nbsp; <kbd>D</kbd> Download
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ---------- CONFIG ----------
+        const BASE_URL = 'https://r-bots-free-apis.co08.art/api/v1/api/nsfw/';
+        const CATEGORIES = ['pussy', 'cuckold', 'yuri', 'blowjob'];
+
+        // ---------- DOM REFS ----------
+        const grid = document.getElementById('categoryGrid');
+        const imageWrapper = document.getElementById('imageWrapper');
+        const mainImage = document.getElementById('mainImage');
+        const placeholder = document.getElementById('placeholder');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let currentCategory = 'pussy';
+        let currentImageUrl = '';
+
+        // ---------- HELPERS ----------
+        function showImage(url) {
+            if (!url) {
+                mainImage.style.display = 'none';
+                placeholder.style.display = 'block';
+                placeholder.innerHTML = `<span>⚠️</span> No image received<br/>Try another category or refresh`;
+                return;
+            }
+            currentImageUrl = url;
+            mainImage.src = url;
+            mainImage.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+
+        function showLoading() {
+            placeholder.style.display = 'block';
+            placeholder.innerHTML = `<span>⏳</span> Loading...`;
+            mainImage.style.display = 'none';
+        }
+
+        function showError(msg) {
+            placeholder.style.display = 'block';
+            placeholder.innerHTML = `<span>❌</span> ${msg}`;
+            mainImage.style.display = 'none';
+        }
+
+        // ---------- FETCH API ----------
+        async function fetchImage(category) {
+            if (!category) return;
+            showLoading();
+            const url = `${BASE_URL}${category}`;
+            try {
+                const resp = await fetch(url, {
+                    headers: { 'Accept': 'image/*, application/json' }
+                });
+
+                // If response is an image blob
+                const contentType = resp.headers.get('content-type') || '';
+                if (contentType.startsWith('image/')) {
+                    const blob = await resp.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    showImage(objectUrl);
+                    return;
+                }
+
+                // If response is JSON with image URL
+                const text = await resp.text();
+                try {
+                    const data = JSON.parse(text);
+                    // try common fields
+                    const imgUrl = data.url || data.image || data.data || data.result || data.file || data.link || data.download_url;
+                    if (imgUrl && typeof imgUrl === 'string' && imgUrl.startsWith('http')) {
+                        showImage(imgUrl);
+                        return;
+                    }
+                    // if JSON contains an array of images
+                    if (Array.isArray(data) && data.length > 0) {
+                        const first = data[0];
+                        const urlFromArray = first.url || first.image || first.link || first;
+                        if (typeof urlFromArray === 'string' && urlFromArray.startsWith('http')) {
+                            showImage(urlFromArray);
+                            return;
+                        }
+                    }
+                    // if it's a raw string that looks like a URL
+                    if (typeof data === 'string' && data.startsWith('http')) {
+                        showImage(data);
+                        return;
+                    }
+                } catch (_) {
+                    // not JSON
+                }
+
+                // If text is a raw URL
+                if (text.trim().startsWith('http')) {
+                    showImage(text.trim());
+                    return;
+                }
+
+                // If response is HTML with image
+                const match = text.match(/https?:\/\/[^\s"']+\.(jpg|jpeg|png|gif|webp|bmp|svg|mp4|webm)[^\s"']*/i);
+                if (match) {
+                    showImage(match[0]);
+                    return;
+                }
+
+                showError('No image found in response');
+            } catch (err) {
+                showError('Network error: ' + err.message);
+            }
+        }
+
+        // ---------- REFRESH ----------
+        function refreshCurrent() {
+            if (currentCategory) {
+                fetchImage(currentCategory);
+            }
+        }
+
+        // ---------- DOWNLOAD ----------
+        function downloadCurrent() {
+            if (!currentImageUrl) {
+                alert('No image to download. Load one first.');
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = currentImageUrl;
+            link.download = `darkx_${currentCategory}_${Date.now()}.jpg`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ---------- SET CATEGORY ----------
+        function setCategory(category) {
+            if (!category || !CATEGORIES.includes(category)) return;
+            currentCategory = category;
+
+            // update active button
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                const api = btn.getAttribute('data-api');
+                btn.classList.toggle('active', api === category);
+            });
+
+            fetchImage(category);
+        }
+
+        // ---------- EVENT LISTENERS ----------
+        // Category buttons
+        grid.addEventListener('click', (e) => {
+            const btn = e.target.closest('.cat-btn');
+            if (!btn) return;
+            const api = btn.getAttribute('data-api');
+            if (api) setCategory(api);
+        });
+
+        // Refresh
+        refreshBtn.addEventListener('click', refreshCurrent);
+
+        // Download
+        downloadBtn.addEventListener('click', downloadCurrent);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // R = Refresh
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                refreshCurrent();
+            }
+            // D = Download
+            if (e.key === 'd' || e.key === 'D') {
+                e.preventDefault();
+                downloadCurrent();
+            }
+        });
+
+        // ---------- INIT ----------
+        // Load first category
+        setCategory('pussy');
+    })();
+</script>
+
 </body>
 </html>
