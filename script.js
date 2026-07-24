@@ -5,7 +5,6 @@ let currentCategory = 'pussy';
 let currentImageUrl = '';
 let currentRawData = {};
 
-// ===== DOM ELEMENTS =====
 const imageContainer = document.getElementById('imageContainer');
 
 // ===== LOAD CATEGORY =====
@@ -16,7 +15,7 @@ function loadCategory(category) {
     fetchImage();
 }
 
-// ===== FETCH IMAGE (Handles Binary/JSON) =====
+// ===== FETCH IMAGE =====
 async function fetchImage() {
     imageContainer.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>`;
     try {
@@ -29,9 +28,8 @@ async function fetchImage() {
         const contentType = response.headers.get('content-type') || '';
         console.log('📄 Content-Type:', contentType);
         
-        // ===== CHECK IF BINARY IMAGE =====
+        // ===== BINARY IMAGE =====
         if (contentType.includes('image') || contentType.includes('octet-stream')) {
-            // Binary image response — convert to blob URL
             const blob = await response.blob();
             const imageUrl = URL.createObjectURL(blob);
             currentImageUrl = imageUrl;
@@ -41,90 +39,60 @@ async function fetchImage() {
                     <img src="${imageUrl}" alt="${currentCategory}" />
                 </div>
                 <div class="image-meta">
-                    <span>📂 Category: ${currentCategory.toUpperCase()}</span>
-                    <span>📄 Type: ${contentType}</span>
-                    <span>📦 Size: ${(blob.size / 1024).toFixed(1)} KB</span>
+                    <span>📂 ${currentCategory.toUpperCase()}</span>
+                    <span>📄 ${contentType}</span>
+                    <span>📦 ${(blob.size / 1024).toFixed(1)} KB</span>
                 </div>
                 <div class="controls">
-                    <button onclick="refreshImage()" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button onclick="downloadImage()" class="download-btn">
-                        <i class="fas fa-download"></i> Download
-                    </button>
+                    <button onclick="refreshImage()" class="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <button onclick="downloadImage()" class="download-btn"><i class="fas fa-download"></i> Download</button>
                 </div>
             `;
             return;
         }
         
-        // ===== TRY TO PARSE AS JSON =====
+        // ===== JSON RESPONSE =====
         let data;
         try {
             const text = await response.text();
             data = JSON.parse(text);
         } catch (e) {
-            // If not JSON, treat as binary
             const blob = await response.blob();
             const imageUrl = URL.createObjectURL(blob);
             currentImageUrl = imageUrl;
-            
             imageContainer.innerHTML = `
                 <div class="image-wrapper">
                     <img src="${imageUrl}" alt="${currentCategory}" />
                 </div>
                 <div class="image-meta">
-                    <span>📂 Category: ${currentCategory.toUpperCase()}</span>
-                    <span>📄 Raw Binary Image</span>
-                    <span>📦 Size: ${(blob.size / 1024).toFixed(1)} KB</span>
+                    <span>📂 ${currentCategory.toUpperCase()}</span>
+                    <span>📄 Raw Binary</span>
+                    <span>📦 ${(blob.size / 1024).toFixed(1)} KB</span>
                 </div>
                 <div class="controls">
-                    <button onclick="refreshImage()" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button onclick="downloadImage()" class="download-btn">
-                        <i class="fas fa-download"></i> Download
-                    </button>
+                    <button onclick="refreshImage()" class="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <button onclick="downloadImage()" class="download-btn"><i class="fas fa-download"></i> Download</button>
                 </div>
             `;
             return;
         }
         
-        console.log('📦 JSON Response:', data);
+        console.log('📦 JSON:', data);
         currentRawData = data;
         
-        // ===== EXTRACT IMAGE URL FROM JSON =====
+        // ===== EXTRACT IMAGE URL =====
         let imageUrl = null;
-        let imageTitle = '';
-        
-        if (data.url) {
-            imageUrl = data.url;
-            imageTitle = data.title || data.name || currentCategory;
-        } else if (data.image) {
-            imageUrl = data.image;
-            imageTitle = data.title || data.name || currentCategory;
-        } else if (data.data && data.data.url) {
-            imageUrl = data.data.url;
-            imageTitle = data.data.title || currentCategory;
-        } else if (data.data && data.data.image) {
-            imageUrl = data.data.image;
-            imageTitle = data.data.title || currentCategory;
-        } else if (data.link) {
-            imageUrl = data.link;
-            imageTitle = data.title || currentCategory;
-        } else if (Array.isArray(data) && data.length > 0 && data[0].url) {
-            imageUrl = data[0].url;
-            imageTitle = data[0].title || currentCategory;
-        } else if (typeof data === 'string' && data.startsWith('http')) {
-            imageUrl = data;
-            imageTitle = currentCategory;
-        } else {
-            // Try to find any URL in response
+        if (data.url) imageUrl = data.url;
+        else if (data.image) imageUrl = data.image;
+        else if (data.data?.url) imageUrl = data.data.url;
+        else if (data.data?.image) imageUrl = data.data.image;
+        else if (data.link) imageUrl = data.link;
+        else if (Array.isArray(data) && data[0]?.url) imageUrl = data[0].url;
+        else if (typeof data === 'string' && data.startsWith('http')) imageUrl = data;
+        else {
             const str = JSON.stringify(data);
             const match = str.match(/https?:\/\/[^\s"']+\.(jpg|jpeg|png|gif|webp)/i);
-            if (match) {
-                imageUrl = match[0];
-                imageTitle = currentCategory;
-            }
+            if (match) imageUrl = match[0];
         }
         
         if (imageUrl) {
@@ -138,22 +106,18 @@ async function fetchImage() {
                     <pre>${JSON.stringify(currentRawData, null, 2)}</pre>
                 </div>
                 <div class="image-meta">
-                    <span>📂 Category: ${currentCategory.toUpperCase()}</span>
-                    <span>🔗 <a href="${imageUrl}" target="_blank">Open Image</a></span>
+                    <span>📂 ${currentCategory.toUpperCase()}</span>
+                    <span>🔗 <a href="${imageUrl}" target="_blank">Open</a></span>
                 </div>
                 <div class="controls">
-                    <button onclick="refreshImage()" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button onclick="downloadImage()" class="download-btn">
-                        <i class="fas fa-download"></i> Download
-                    </button>
+                    <button onclick="refreshImage()" class="refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    <button onclick="downloadImage()" class="download-btn"><i class="fas fa-download"></i> Download</button>
                 </div>
             `;
         } else {
             imageContainer.innerHTML = `
                 <div class="raw-data" style="width:100%;">
-                    <h3>⚠️ No Image Found — Raw Response:</h3>
+                    <h3>⚠️ No Image Found</h3>
                     <pre>${JSON.stringify(currentRawData, null, 2)}</pre>
                 </div>
             `;
@@ -163,8 +127,7 @@ async function fetchImage() {
         imageContainer.innerHTML = `
             <div class="loading" style="color:#ff6b6b;">
                 <i class="fas fa-exclamation-triangle"></i>
-                Error: ${error.message}
-                <br />
+                ${error.message}
                 <button onclick="fetchImage()" style="margin-top:15px;padding:10px 24px;border-radius:10px;border:1px solid #e50914;background:transparent;color:#fff;cursor:pointer;">Retry</button>
             </div>
         `;
